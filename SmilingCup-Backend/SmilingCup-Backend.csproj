@@ -11,4 +11,12 @@
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.3"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="iam\" />
+      <Folder Include="payment\" />
+      <Folder Include="product\" />
+      <Folder Include="profiles\" />
+      <Folder Include="shared\" />
+    </ItemGroup>
+
 </Project>
