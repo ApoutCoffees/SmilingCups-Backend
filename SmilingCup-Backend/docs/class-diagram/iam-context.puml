@@ -1,0 +1,310 @@
+﻿@startuml
+
+left to right direction
+
+package "iam"{
+    package "domain"{
+        package "model"{
+            package "aggregates"{
+                class User{
+                    +id: int
+                    +subscriptionId: SubscriptionId
+                    +fullName: FullName
+                    +email: Email
+                    +password: Password 
+                    +phone: long
+                    +address: Address
+                    +city: string 
+                    +country: string
+                    +isVerified: boolean
+                    +type: UserType                    
+                    --
+                    +User()
+                    +UpdateFullName(firstName: string, lastName: string): User
+                    +UpdatePassword(password: string): User
+                }
+            }
+            package "value objects"{
+                record SubscriptionId{
+                    +subscriptionId: int
+                }
+                record FullName{
+                    +firstName: string
+                    +lastName: string
+                }
+                record Email{
+                    +email: string
+                }
+                record Password{
+                    +password: string
+                }
+                record Address{
+                    +address: string
+                }
+                record UserType{
+                    CUSTOMER
+                    PRODUCER
+                }
+                
+            }
+            package "commands"{
+                record SignUpCommand{
+                     +subscriptionId: int
+                     +fullName: string
+                     +email: string
+                     +password: string 
+                     +phone: long
+                     +address: string
+                     +city: string 
+                     +country: string
+                     +isVerified: boolean
+                     +type: string                    
+                }   
+                record SignInCommand{
+                    +email: string
+                    +password: string
+                }
+            }
+            package "queries"{
+                record GetAllUsersQuery{}
+                record GetUserByIdQuery{
+                    +id: int
+                }
+            }
+        }
+        package "services"{
+
+            interface IUserCommandService{
+                +Handle(SignInCommand): Task<User, token>
+                +Handle(SignUpCommand): Task
+            }
+            interface IUserQueryService{
+                +Handle(GetAllUsersQuery): Task<IEnumerable<User>>
+                +Handle(GetUserByIdQuery): Task<User>
+            }
+        }
+        package "repositories"{
+            interface IUserRepository{
+            }
+        }
+    }
+    package "infrastructure"{
+        package "persistence"{
+            package "efc"{
+                package "configuration"{
+                    package "extensions"{
+                        class ModelBuilderExtensions
+                    }
+                }
+                package "repositories"{
+                    class UserRepository
+                }
+            }
+        }
+        package "hashing.bcrypt.services"{
+            class HashingService
+        }
+        package "pipeline.middleware"{
+            package "attributes"{
+                class AllowAnonymousAttribute
+                class AuthorizeAttribute
+            }
+            package "components"{
+                class RequestAuthorizationMiddleware
+            }
+            package "extensions"{
+                class RequestAuthorizationMiddlewareExtensions
+            }
+        }
+        package "tokens.jwt"{
+            package "configuration"{
+                class TokenSettings
+            }
+            package "services"{
+                class TokenService
+            }
+        }
+    }
+    package "application"{
+        package "acl"{
+            class IamContextFacade{
+                +userCommandService: IUserCommandService
+                --
+                +IamContextFacade(IUserCommandService)
+            }
+        }
+        package "internal"{
+            package "command services"{
+                class UserCommandService{
+                    +userRepository: IUserRepository
+                    +tokenService: ITokenService
+                    +hashingService: IHashingService 
+                    +unitOfWork: IUnitOfWork
+                    --
+                    +UserCommandService(IUserRepository,ITokenService,IHashingService, IUnitOfWork)
+                }
+            }
+            package "query services"{
+
+                class UserQueryService{
+                    +userRepository: IUserRepository
+                    --
+                    +UserQueryService(IUserRepository)
+                }
+            }
+            package "outbound services"{
+                interface IHashingService
+                interface ITokenService
+            }
+        }
+    }
+    package "interfaces"{
+        package "acl"{
+            interface IIamContextFacade{
+            --
+                +CreateUser(subscriptionId: int, fullName: string, email: string
+                                                 ,password: string 
+                                                 ,phone: long
+                                                 ,address: string
+                                                 ,city: string 
+                                                 ,country: string
+                                                 ,isVerified: boolean
+                                                 ,type: string    ): Task<int>            
+            }
+        }
+        package "rest"{
+            package "resources"{
+                record SignUpResource
+                record SignInResource
+                record UserResource 
+                record AuthenticatedUserResource
+            }
+            package "transform"{
+                class SignInCommandFromResourceAssembler
+                class SignUpCommandFromResourceAssembler
+                class UserResourceFromEntityAssembler
+                class AuthenticatedUserResourceFromEntityAssembler
+            }
+
+            class UsersController{
+                +userQueryService: IUserQueryService
+                --
+                +UsersController(IUserQueryService)
+                +GetUserById(orderId: int): Task<IActionResult>
+                +GetAllUsers(): Task<IActionResult>            
+            }
+            class AuthenticationController{
+                +userCommandService: IUserCommandService
+                --
+                AuthenticationController(IUserCommandService)
+                +SignIn(SignInResource): Task<IActionResult>
+                +SignUp(SignUpResource): Task<IActionResult>
+            }
+        }
+    }
+}
+
+
+
+package "shared"{
+    package "domain"{
+        package "model"{
+            package "events"{
+                interface IEvent
+            }
+            package "value objects"{
+                record Money{
+                    +amount: decimal
+                    +currency: string
+                }
+            }
+        }
+        package "repositories"{
+            interface IBaseRepository
+            interface IUnitOfWork
+        }
+    }
+    package "infrastructure"{
+        package "interfaces"{
+            package "asp"{
+                package "configuration"{
+                    package "extensions"{
+                        class StringExtensions
+                    }
+                    class KebabCaseRouteNamingConvention
+                }
+            }        
+        }
+        package "mediator"{
+            package "cortex"{
+                package "configuration"{
+                    class LoggingCommandBehavior
+                }
+            }
+        }
+        package "persistence"{
+            package "efc"{
+                package "configuration"{
+                    package "extensions"{
+                        class ModelBuilderExtension
+                        class StringExtensions
+                    }
+                    class AppDbContext
+                }
+                package "repositories"{
+                    class BaseRepository
+                    class UnitOfWork
+                }
+            }
+        }
+    }
+    package "application"{
+        package "internal"{
+            package "event handlers"{
+                interface IEventHandler
+            }
+        }
+    }
+
+}
+
+
+User --> SubscriptionId
+User --> FullName
+User --> Email
+User --> Password
+User --> Address
+User --> UserType
+
+
+IUserCommandService ..> SignInCommand
+IUserCommandService ..> SignUpCommand
+IUserQueryService ..> GetAllUsersQuery
+IUserQueryService ..> GetUserByIdQuery
+
+IUserRepository --|> IBaseRepository
+UserRepository --|> BaseRepository
+UserRepository ..|> IUserRepository
+
+IamContextFacade ..|> IIamContextFacade
+
+UserCommandService ..|> IUserCommandService
+UserCommandService -->IUserRepository
+UserCommandService --> IUnitOfWork
+
+UserQueryService ..|> IUserQueryService
+UserQueryService --> IUserRepository
+
+SignUpCommandFromResourceAssembler ..> SignUpResource
+SignInCommandFromResourceAssembler ..> SignInResource
+UserResourceFromEntityAssembler ..> User
+AuthenticatedUserResourceFromEntityAssembler ..> User
+
+
+UsersController --> IUserQueryService
+
+AuthenticationController --> IUserCommandService
+AuthenticationController ..> SignUpResource
+AuthenticationController ..> SignInResource
+
+@enduml
