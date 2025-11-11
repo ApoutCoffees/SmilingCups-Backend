@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "tErw4i69pRQ=",
+  "dgSpecHash": "h8G8eCPDO68=",
   "success": true,
-  "projectFilePath": "/Users/alumnos/Documents/7420/ses1sem10/SmilingCup-Backend/SmilingCup-Backend/SmilingCup-Backend.csproj",
+  "projectFilePath": "D:\\5to Ciclo\\Aplicaciones Web\\trabajo\\SmilingCups-Backend\\SmilingCup-Backend\\SmilingCup-Backend.csproj",
   "expectedPackageFiles": [
-    "/Users/alumnos/.nuget/packages/microsoft.aspnetcore.openapi/9.0.3/microsoft.aspnetcore.openapi.9.0.3.nupkg.sha512",
-    "/Users/alumnos/.nuget/packages/microsoft.openapi/1.6.17/microsoft.openapi.1.6.17.nupkg.sha512"
+    "C:\\Users\\Asus Intel\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.3\\microsoft.aspnetcore.openapi.9.0.3.nupkg.sha512",
+    "C:\\Users\\Asus Intel\\.nuget\\packages\\microsoft.openapi\\1.6.17\\microsoft.openapi.1.6.17.nupkg.sha512"
   ],
   "logs": []
 }
