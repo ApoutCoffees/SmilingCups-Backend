@@ -1,0 +1,338 @@
+﻿@startuml
+
+left to right direction
+
+package "product"{
+    package "domain"{
+        package "model"{
+            package "aggregates"{
+                class Coffee{
+                    +id: int
+                    +mysteryBoxId: MysteryBoxId
+                    +producerId: UserId
+                    +name: CoffeeName
+                    +kind: CoffeeKind
+                    +notes: CoffeeNotes
+                    +place: OriginPlace
+                    +price: Money
+                    +toasted: RoastLevel
+                    +description: string
+                    +imageUrl: string
+                    +originKey: string
+                    +minSubscription: string
+                    +Coffee()
+                    +Coffee(CreateCoffeeCommand)
+                }
+                class MysteryBox{
+                    +id: int
+                    +totalAmount: Money
+                    +createdAt: Date
+                    +updatedAt: Date
+                    +MysteryBox()
+                    +MysteryBox(CreateMysteryBoxCommand)
+                }
+            }
+            package "value objects"{
+                record MysteryBoxId {
+                  +mysteryBoxId: int
+                }
+                record UserId {
+                  +userId: int
+                }
+                record CoffeeName {
+                  +name: string
+                }
+                record CoffeeKind {
+                  +kind: string 
+                }
+                record CoffeeNotes {
+                  +notes: string[] 
+                }
+                record OriginPlace {
+                  +originPlace: string 
+                }
+                record RoastLevel {
+                  +roastLevel: string
+                }
+            }
+            package "commands"{
+                record CreateMysteryBoxCommand{
+                    +totalAmount: Money
+                }
+                record CreateCoffeeCommand{
+                    +mysteryBoxId: int
+                    +producerId: int
+                    +name: string
+                    +kind: string
+                    +notes: string[]
+                    +place: string
+                    +price: decimal
+                    +toasted: string
+                    +description: string
+                    +imageUrl: string
+                    +originKey: string
+                    +minSubscription: string                
+                }
+            }
+            package "queries"{
+                record GetAllMysteryBoxesQuery{}
+                record GetAllCoffeesQuery{}
+                record GetMysteryBoxByIdQuery{
+                    +id int
+                }
+                record GetCoffeeByIdQuery{
+                    +id: int
+                }
+            }
+        }
+        package "services"{
+            interface IMysteryBoxCommandService{
+                +Handle(CreateCoffeeCommand): Task<MysteryBox>
+            }
+            interface IMysteryBoxQueryService{
+                +Handle(GetAllMysteryBoxesQuery): Task<IEnumerable<MysteryBox>>
+                +Handle(GetMysteryBoxByIdQuery): Task<MysteryBox>
+            }
+            interface ICoffeeCommandService{
+                +Handle(CreateCoffeeCommand): Task<Coffee>
+            }
+            interface ICoffeeQueryService{
+                +Handle(GetAllCoffeesQuery): Task<IEnumerable<Coffee>>
+                +Handle(GetCoffeeByIdQuery): Task<Coffee>
+            }
+        }
+        package "repositories"{
+            interface IMysteryBoxRepository{
+            }
+            interface ICoffeeRepository{
+            }
+        }
+    }
+    package "infrastructure"{
+        package "persistence"{
+            package "efc"{
+                package "configuration"{
+                    package "extensions"{
+                        class ModelBuilderExtensions
+                    }
+                }
+                package "repositories"{
+                    class MysteryBoxRepository
+                    class CoffeeRepository
+                }
+            }
+        }
+    }
+    package "application"{
+        package "acl"{
+            class ProductContextFacade{
+                +mysteryBoxCommandService: IMysteryBoxCommandService
+                +coffeeCommandService: ICoffeeCommandService
+                --
+                +ProductContextFacade(IMysteryBoxCommandService, ICoffeeCommandService)
+            }
+        }
+        package "internal"{
+            package "command services"{
+                class MysteryBoxCommandService{
+                    +mysteryBoxRepository: IMysteryBoxRepository
+                    +unitOfWork: IUnitOfWork
+                    --
+                    +MysteryBoxCommandService(IMysteryBoxRepository, IUnitOfWork)
+                }
+                class CoffeeCommandService{
+                    +coffeeRepository: ICoffeeRepository
+                    +unitOfWork: IUnitOfWork
+                    --
+                    +CoffeeCommandService(IMysteryBoxRepository, IUnitOfWork)
+                }
+            }
+            package "query services"{
+                class MysteryBoxQueryService{
+                    +mysteryBoxRepository: IMysteryBoxRepository
+                    --
+                    +MysteryBoxQueryService(IMysteryBoxRepository)
+                }
+                class CoffeeQueryService{
+                    +coffeeRepository: ICoffeeRepository
+                    --
+                    +CoffeeQueryService(ICoffeeRepository)
+                }
+            }
+        }
+    }
+    package "interfaces"{
+        package "acl"{
+            interface IProductContextFacade{
+            --
+                +CreateMysteryBox(totalAmount: decimal): Task<int>
+                +CreateCoffee(+mysteryBoxId: int, producerId: int, name: string, kind: string, notes: string[], place: string
+                                                  , price: decimal
+                                                  , toasted: string
+                                                  , description: string
+                                                  , imageUrl: string
+                                                  , originKey: string
+                                                  , minSubscription: string): Task<int>            
+            }
+        }
+        package "rest"{
+            package "resources"{
+                record CreateMysteryBoxResource
+                record CreateCoffeeResource
+                record MysteryBoxResource
+                record CoffeeResource 
+            }
+            package "transform"{
+                class CreateMysteryBoxCommandFromResourceAssembler
+                class CreateCoffeeCommandFromResourceAssembler
+                class MysteryBoxResourceFromEntityAssembler
+                class CoffeeResourceFromEntityAssembler
+            }
+            class MysteryBoxesController{
+                +mysteryBoxCommandService: IMysteryBoxCommandService
+                +mysteryBoxQueryService: IMysteryBoxQueryService
+                --
+                +MysteryBoxesController(IMysteryBoxCommandService, IMysteryBoxQueryService)
+                +CreateMysteryBox(CreateMysteryBoxResource): Task<IActionResult>
+                +GetMysteryBoxById(mysteryBoxId: int): Task<IActionResult>
+                +GetAllMysteryBoxes(): Task<IActionResult>
+            }
+            class CoffeesController{
+                +coffeeCommandService: ICoffeeCommandService
+                +coffeeBoxQueryService: ICoffeeQueryService
+                --
+                +CoffeesController(ICoffeeCommandService, ICoffeeQueryService)
+                +CreateCoffee(CreateCoffeeResource): Task<IActionResult>
+                +GetCoffeeById(mysteryBoxId: int): Task<IActionResult>
+                +GetAllCoffees(): Task<IActionResult>            
+            }
+        }
+    }
+}
+
+
+
+package "shared"{
+    package "domain"{
+        package "model"{
+            package "events"{
+                interface IEvent
+            }
+            package "value objects"{
+                record Money{
+                    +amount: decimal
+                    +currency: string
+                }
+            }
+        }
+        package "repositories"{
+            interface IBaseRepository
+            interface IUnitOfWork
+        }
+    }
+    package "infrastructure"{
+        package "interfaces"{
+            package "asp"{
+                package "configuration"{
+                    package "extensions"{
+                        class StringExtensions
+                    }
+                    class KebabCaseRouteNamingConvention
+                }
+            }        
+        }
+        package "mediator"{
+            package "cortex"{
+                package "configuration"{
+                    class LoggingCommandBehavior
+                }
+            }
+        }
+        package "persistence"{
+            package "efc"{
+                package "configuration"{
+                    package "extensions"{
+                        class ModelBuilderExtension
+                        class StringExtensions
+                    }
+                    class AppDbContext
+                }
+                package "repositories"{
+                    class BaseRepository
+                    class UnitOfWork
+                }
+            }
+        }
+    }
+    package "application"{
+        package "internal"{
+            package "event handlers"{
+                interface IEventHandler
+            }
+        }
+    }
+
+}
+
+
+Coffee --> MysteryBoxId
+Coffee --> UserId
+Coffee --> CoffeeName
+Coffee --> CoffeeKind
+Coffee --> CoffeeNotes
+Coffee --> OriginPlace
+Coffee --> Money
+Coffee --> RoastLevel
+Coffee ..> CreateCoffeeCommand
+
+MysteryBox --> Money
+MysteryBox ..> CreateMysteryBoxCommand
+
+IMysteryBoxCommandService ..> CreateMysteryBoxCommand
+IMysteryBoxQueryService ..> GetAllMysteryBoxesQuery
+IMysteryBoxQueryService ..> GetMysteryBoxByIdQuery
+
+ICoffeeCommandService ..> CreateCoffeeCommand
+ICoffeeQueryService ..> GetAllCoffeesQuery
+ICoffeeQueryService ..> GetCoffeeByIdQuery
+
+IMysteryBoxRepository --|> IBaseRepository
+ICoffeeRepository --|> IBaseRepository
+
+MysteryBoxRepository --|> BaseRepository
+MysteryBoxRepository ..|> IMysteryBoxRepository
+
+CoffeeRepository --|> BaseRepository
+CoffeeRepository ..|> ICoffeeRepository
+
+ProductContextFacade ..|> IProductContextFacade
+
+
+MysteryBoxCommandService ..|> IMysteryBoxCommandService
+MysteryBoxCommandService --> IMysteryBoxRepository
+MysteryBoxCommandService --> IUnitOfWork
+
+CoffeeCommandService ..|> ICoffeeCommandService
+CoffeeCommandService -->ICoffeeRepository
+CoffeeCommandService --> IUnitOfWork
+
+MysteryBoxQueryService ..|> IMysteryBoxQueryService
+MysteryBoxQueryService --> IMysteryBoxRepository
+
+CoffeeQueryService ..|> ICoffeeQueryService
+CoffeeQueryService --> ICoffeeRepository
+
+CreateMysteryBoxCommandFromResourceAssembler ..> CreateMysteryBoxResource
+CreateCoffeeCommandFromResourceAssembler ..> CreateCoffeeResource
+MysteryBoxResourceFromEntityAssembler ..> MysteryBox
+CoffeeResourceFromEntityAssembler ..> Coffee
+
+MysteryBoxesController --> IMysteryBoxQueryService
+MysteryBoxesController --> IMysteryBoxCommandService
+MysteryBoxesController ..> CreateMysteryBoxResource
+
+
+CoffeesController --> ICoffeeQueryService
+CoffeesController --> ICoffeeCommandService
+CoffeesController ..> CreateCoffeeResource
+@enduml
