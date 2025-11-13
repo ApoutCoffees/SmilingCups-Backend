@@ -1,0 +1,25 @@
+﻿using SmilingCup_Backend.Iam.Domain.Model.Aggregates;
+using SmilingCup_Backend.Iam.Domain.Model.Queries;
+using SmilingCup_Backend.Iam.Domain.Repositories;
+using SmilingCup_Backend.Iam.Domain.Services;
+
+namespace SmilingCup_Backend.Iam.Application.Internal.QueryServices;
+
+public class UserQueryService(IUserRepository userRepository) : IUserQueryService
+{
+
+    public async Task<IEnumerable<User>> Handle(GetAllUsersQuery query)
+    {
+        return await userRepository.ListAsync();
+    }
+
+    public async Task<User?> Handle(GetUserByIdQuery query)
+    {
+        return await userRepository.FindByIdAsync(query.Id);
+    }
+    public async Task<User?> Handle(GetUserByEmailQuery query)
+    {
+        return await userRepository.FindByEmailAsync(query.Email);
+    }
+    
+}
