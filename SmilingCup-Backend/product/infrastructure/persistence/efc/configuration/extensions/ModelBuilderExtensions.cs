@@ -71,7 +71,7 @@ public static class ModelBuilderExtensions
                     v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null)!
                 )
                 .HasColumnName("Notes")
-                .HasColumnType("nvarchar(max)");
+                .HasColumnType("longtext");
         });
 
         builder.Entity<Coffee>().OwnsOne(c => c.place, p =>

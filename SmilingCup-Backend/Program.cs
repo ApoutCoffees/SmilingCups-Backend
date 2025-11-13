@@ -1,4 +1,11 @@
+using Cortex.Mediator.Commands;
+using Cortex.Mediator.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using SmilingCup_Backend.product.application.Internal.commandservices;
+using SmilingCup_Backend.product.application.Internal.queryservices;
+using SmilingCup_Backend.product.domain.repositories;
+using SmilingCup_Backend.product.domain.services;
+using SmilingCup_Backend.product.infrastructure.persistence.efc.repositories;
 using SmilingCup_Backend.profiles.application.Internal.commandservices;
 using SmilingCup_Backend.profiles.application.Internal.queryservices;
 using SmilingCup_Backend.profiles.domain.repositories;
@@ -6,6 +13,7 @@ using SmilingCup_Backend.profiles.domain.services;
 using SmilingCup_Backend.profiles.infrastructure.persistence.efc.repositories;
 using SmilingCup_Backend.Shared.domain.repositories;
 using SmilingCup_Backend.Shared.Infrastructure.Interfaces.Asp.Configuration;
+using SmilingCup_Backend.Shared.infrastructure.mediator.cortex.configuration;
 using SmilingCup_Backend.Shared.infrastructure.persistence.efc.configuration;
 using SmilingCup_Backend.Shared.infrastructure.persistence.efc.repositories;
 
@@ -68,6 +76,30 @@ builder.Services.AddScoped<IFavoriteCommandService, FavoriteCommandService>();
 builder.Services.AddScoped<IFavoriteQueryService, FavoriteQueryService>();
 
 
+// Product Bounded Context Dependency Injections Configuration
+builder.Services.AddScoped<IMysteryBoxRepository, MysteryBoxRepository>();
+builder.Services.AddScoped<IMysteryBoxCommandService, MysteryBoxCommandService>();
+builder.Services.AddScoped<IMysteryBoxQueryService, MysteryBoxQueryService>();
+
+builder.Services.AddScoped<ICoffeeRepository, CoffeeRepository>();
+builder.Services.AddScoped<ICoffeeCommandService, CoffeeCommandService>();
+builder.Services.AddScoped<ICoffeeQueryService, CoffeeQueryService>();
+
+
+
+
+// Add Mediator Injection Configuration
+builder.Services.AddScoped(typeof(ICommandPipelineBehavior<>), typeof(LoggingCommandBehavior<>));
+
+// Add Cortex Mediator for Event Handling
+builder.Services.AddCortexMediator(
+    configuration: builder.Configuration,
+    handlerAssemblyMarkerTypes: [typeof(Program)], configure: options =>
+    {
+        options.AddOpenCommandPipelineBehavior(typeof(LoggingCommandBehavior<>));
+        //options.AddDefaultBehaviors();
+    });
+
 
 var app = builder.Build();
 
@@ -93,6 +125,8 @@ app.UseCors("AllowAllPolicy");
 
 
 // Add Authorization Middleware to Pipeline
+
+
 //app.UseRequestAuthorization();
 
 app.UseHttpsRedirection();
