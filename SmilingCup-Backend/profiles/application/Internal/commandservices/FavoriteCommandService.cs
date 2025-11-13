@@ -10,7 +10,7 @@ public class FavoriteCommandService(
     IFavoriteRepository favoriteRepository, IUnitOfWork  unitOfWork)
     : IFavoriteCommandService
 {
-    public async Task<Favorite> Handle(CreateFavoriteCommand command)
+    public async Task<Favorite?> Handle(CreateFavoriteCommand command)
     {
         var favorite = new Favorite(command);
         try

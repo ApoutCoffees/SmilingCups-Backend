@@ -5,5 +5,5 @@ namespace SmilingCup_Backend.profiles.domain.services;
 
 public interface IProducerStatCommandService
 {
-    Task<ProducerStat> Handle(CreateProducerStatCommand command);
+    Task<ProducerStat?> Handle(CreateProducerStatCommand command);
 }

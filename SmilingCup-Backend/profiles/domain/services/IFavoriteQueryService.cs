@@ -7,5 +7,5 @@ public interface IFavoriteQueryService
 {
     Task<IEnumerable<Favorite>> Handle(GetAllFavoritesQuery query);
     
-    Task<Favorite> Handle(GetFavoriteByIdQuery query);
+    Task<Favorite?> Handle(GetFavoriteByIdQuery query);
 }
