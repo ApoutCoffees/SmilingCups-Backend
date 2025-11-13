@@ -36,8 +36,6 @@
     <ItemGroup>
       <Folder Include="iam\" />
       <Folder Include="payment\" />
-      <Folder Include="product\" />
-      <Folder Include="profiles\" />
       <Folder Include="shared\" />
     </ItemGroup>
 

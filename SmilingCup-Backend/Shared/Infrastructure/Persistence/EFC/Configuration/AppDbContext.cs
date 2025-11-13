@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using EntityFrameworkCore.CreatedUpdatedDate.Extensions;
+using SmilingCup_Backend.product.infrastructure.persistence.efc.configuration.extensions;
+using SmilingCup_Backend.profiles.infrastructure.persistence.efc.configuration.extensions;
 using SmilingCup_Backend.Shared.infrastructure.persistence.efc.configuration.extensions;
 using SmilingCup_Backend.Iam.Domain.Model.Aggregates; 
 using SmilingCup_Backend.Iam.Infrastructure.Persistence.EFC.Configuration.Extensions;
@@ -20,8 +22,14 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
     {
         base.OnModelCreating(builder);
         builder.ApplyIamConfiguration();
+        
+        //Profiles Context
+        builder.ApplyProfilesConfiguration();
+        
+        //Product Context
+        builder.ApplyProductConfiguration();
 
-
+        // General Naming Convention for the database objects
         builder.UseSnakeCaseNamingConvention();
         
     }
