@@ -5,5 +5,5 @@ namespace SmilingCup_Backend.product.domain.services;
 
 public interface IMysteryBoxCommandService
 {
-    Task<MysteryBox> Handle(CreateMysteryBoxCommand command);
+    Task<MysteryBox?> Handle(CreateMysteryBoxCommand command);
 }

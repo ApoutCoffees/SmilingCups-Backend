@@ -5,5 +5,5 @@ namespace SmilingCup_Backend.product.domain.services;
 
 public interface ICoffeeCommandService
 {
-    Task<Coffee> Handle(CreateCoffeeCommand command);
+    Task<Coffee?> Handle(CreateCoffeeCommand command);
 }

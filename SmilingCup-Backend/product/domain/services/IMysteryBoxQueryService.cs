@@ -7,5 +7,5 @@ public interface IMysteryBoxQueryService
 {
     Task<IEnumerable<MysteryBox>> Handle(GetAllMysteryBoxesQuery query);
     
-    Task<MysteryBox> Handle(GetMysteryBoxByIdQuery query);
+    Task<MysteryBox?> Handle(GetMysteryBoxByIdQuery query);
 }

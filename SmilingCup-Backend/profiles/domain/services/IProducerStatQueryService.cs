@@ -7,5 +7,5 @@ public interface IProducerStatQueryService
 {
     Task<IEnumerable<ProducerStat>> Handle(GetAllProducerStatsQuery query);
     
-    Task<ProducerStat> Handle(GetProducerStatByIdQuery query);
+    Task<ProducerStat?> Handle(GetProducerStatByIdQuery query);
 }

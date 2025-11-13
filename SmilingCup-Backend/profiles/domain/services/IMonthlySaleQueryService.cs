@@ -7,5 +7,5 @@ public interface IMonthlySaleQueryService
 {
     Task<IEnumerable<MonthlySale>> Handle(GetAllMonthlySalesQuery query);
     
-    Task<MonthlySale> Handle(GetMonthlySaleByIdQuery query);
+    Task<MonthlySale?> Handle(GetMonthlySaleByIdQuery query);
 }

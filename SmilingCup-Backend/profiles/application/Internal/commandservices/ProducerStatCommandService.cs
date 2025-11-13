@@ -10,7 +10,7 @@ public class ProducerStatCommandService(
     IProducerStatRepository producerStatRepository, IUnitOfWork unitOfWork)
     : IProducerStatCommandService
 {
-    public async Task<ProducerStat> Handle(CreateProducerStatCommand command)
+    public async Task<ProducerStat?> Handle(CreateProducerStatCommand command)
     {
         var producerStat = new ProducerStat(command);
         try

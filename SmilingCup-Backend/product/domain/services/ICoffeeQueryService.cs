@@ -7,5 +7,5 @@ public interface ICoffeeQueryService
 {
     Task<IEnumerable<Coffee>> Handle(GetAllCoffeesQuery query);
     
-    Task<Coffee> Handle(GetCoffeeByIdQuery query);
+    Task<Coffee?> Handle(GetCoffeeByIdQuery query);
 }

@@ -5,5 +5,5 @@ namespace SmilingCup_Backend.profiles.domain.services;
 
 public interface IMonthlySaleCommandService
 {
-    Task<MonthlySale> Handle(CreateMonthlySaleCommand command);
+    Task<MonthlySale?> Handle(CreateMonthlySaleCommand command);
 }

@@ -5,5 +5,5 @@ namespace SmilingCup_Backend.profiles.domain.services;
 
 public interface IFavoriteCommandService
 {
-    Task<Favorite> Handle(CreateFavoriteCommand command);
+    Task<Favorite?> Handle(CreateFavoriteCommand command);
 }

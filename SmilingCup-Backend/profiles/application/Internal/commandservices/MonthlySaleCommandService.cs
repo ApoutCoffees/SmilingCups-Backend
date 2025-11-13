@@ -10,7 +10,7 @@ public class MonthlySaleCommandService(
     IMonthlySaleRepository monthlySaleRepository, IUnitOfWork unitOfWork)
     : IMonthlySaleCommandService
 {
-    public async Task<MonthlySale> Handle(CreateMonthlySaleCommand command)
+    public async Task<MonthlySale?> Handle(CreateMonthlySaleCommand command)
     {
         var  monthlySale = new MonthlySale(command);
         try
