@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SmilingCup-Backend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9f515b184cf7ab21b427ec922a89812e5749837e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c67eed829aaca5145ab69d816e3c7261d03e0b1b")]
 [assembly: System.Reflection.AssemblyProductAttribute("SmilingCup-Backend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SmilingCup-Backend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
