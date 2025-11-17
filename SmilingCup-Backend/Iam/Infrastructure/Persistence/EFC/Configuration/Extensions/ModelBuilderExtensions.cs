@@ -15,6 +15,7 @@ public static class ModelBuilderExtensions
             
             entity.OwnsOne(u => u.FullName, fn =>
             {
+                fn.WithOwner().HasForeignKey("Id");
                 fn.Property(p => p.FirstName).HasColumnName("first_name");
                 fn.Property(p => p.LastName).HasColumnName("last_name");
             });
