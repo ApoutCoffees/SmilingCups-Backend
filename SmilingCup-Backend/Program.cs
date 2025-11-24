@@ -1,6 +1,11 @@
 using Cortex.Mediator.Commands;
 using Cortex.Mediator.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using SmilingCup_Backend.Payment.Application.Internal.CommandServices;
+using SmilingCup_Backend.Payment.Application.Internal.QueryServices;
+using SmilingCup_Backend.Payment.Domain.Repositories;
+using SmilingCup_Backend.Payment.Domain.Services;
+using SmilingCup_Backend.Payment.Infrastructure.Persistence.EFC.Repositories;
 using SmilingCup_Backend.product.application.Internal.commandservices;
 using SmilingCup_Backend.product.application.Internal.queryservices;
 using SmilingCup_Backend.product.domain.repositories;
@@ -86,6 +91,15 @@ builder.Services.AddScoped<ICoffeeCommandService, CoffeeCommandService>();
 builder.Services.AddScoped<ICoffeeQueryService, CoffeeQueryService>();
 
 
+// Payment Bounded Context Dependency Injections Configuration
+
+builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+builder.Services.AddScoped<ISubscriptionCommandService, SubscriptionCommandService>();
+builder.Services.AddScoped<ISubscriptionQueryService, SubscriptionQueryService>();
+
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOrderCommandService, OrderCommandService>();
+builder.Services.AddScoped<IOrderQueryService, OrderQueryService>();
 
 
 // Add Mediator Injection Configuration
