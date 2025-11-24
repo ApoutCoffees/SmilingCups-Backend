@@ -35,7 +35,6 @@
 
     <ItemGroup>
       <Folder Include="iam\" />
-      <Folder Include="payment\" />
       <Folder Include="shared\" />
     </ItemGroup>
 
