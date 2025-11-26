@@ -1,0 +1,67 @@
+﻿@startuml
+
+left to right direction 
+package "shared"{
+    package "domain"{
+        package "model"{
+            package "events"{
+                interface IEvent
+            }
+            package "value objects"{
+                record Money{
+                    +amount: decimal
+                    +currency: string
+                }
+            }
+        }
+        package "repositories"{
+            interface IBaseRepository
+            interface IUnitOfWork
+        }
+    }
+    package "infrastructure"{
+        package "interfaces"{
+            package "asp"{
+                package "configuration"{
+                    package "extensions"{
+                        class StringExtensions
+                    }
+                    class KebabCaseRouteNamingConvention
+                }
+            }        
+        }
+        package "mediator"{
+            package "cortex"{
+                package "configuration"{
+                    class LoggingCommandBehavior
+                }
+            }
+        }
+        package "persistence"{
+            package "efc"{
+                package "configuration"{
+                    package "extensions"{
+                        class ModelBuilderExtension
+                        class StringExtensions
+                    }
+                    class AppDbContext
+                }
+                package "repositories"{
+                    class BaseRepository
+                    class UnitOfWork
+                }
+            }
+        }
+    }
+    package "application"{
+        package "internal"{
+            package "event handlers"{
+                interface IEventHandler
+            }
+        }
+    }
+
+}
+
+
+@enduml

@@ -1,0 +1,318 @@
+﻿@startuml
+
+left to right direction
+
+package "payment"{
+    package "domain"{
+        package "model"{
+            package "aggregates"{
+                class Subscription{
+                    +id: int
+                    +status: SubscriptionStatus
+                    +plan: SubscriptionPlan
+                    --
+                    +Subscription()
+                    +Subscription(CreateSubscriptionCommand))
+                }
+                class Order{
+                    +id: int
+                    +userId: UserId
+                    +subscriptionId: SubscriptionId
+                    +orderNumber: string
+                    +total: Money
+                    +status: OrderStatus
+                    +type: string
+                    +Order()
+                    +Order(CreateOrderCommand)
+                }
+            }
+            package "value objects"{
+                enum SubscriptionStatus{
+                    ACTIVE
+                    INACTIVE
+                }
+                enum SubscriptionPlan{
+                    BASIC
+                    PREMIUM
+                    VIP
+                }
+                record UserId {
+                    +userId: int
+                }
+                record SubscriptionId{
+                    +userId: int
+                }
+                enum OrderStatus{
+                    PENDING
+                    COMPLETED
+                    CANCELLED
+                }
+                
+            }
+            package "commands"{
+                record CreateOrderCommand{
+                    +userId: int
+                    +subscriptionId: int
+                    +orderNumber: int
+                    +total: decimal
+                    +status: string
+                    +type: string
+                }
+                record CreateSubscriptionCommand{
+                    +status: string
+                    +plan: string             
+                }
+            }
+            package "queries"{
+                record GetAllOrdersQuery{}
+                record GetAllSubscriptionsQuery{}
+                record GetOrderByIdQuery{
+                    +id int
+                }
+                record GetSubscriptionByIdQuery{
+                    +id: int
+                }
+            }
+        }
+        package "services"{
+            interface IOrderCommandService{
+                +Handle(CreateSubscriptionCommand): Task<Order>
+            }
+            interface IOrderQueryService{
+                +Handle(GetAllOrdersQuery): Task<IEnumerable<Order>>
+                +Handle(GetOrderByIdQuery): Task<Order>
+            }
+            interface ISubscriptionCommandService{
+                +Handle(CreateSubscriptionCommand): Task<Subscription>
+            }
+            interface ISubscriptionQueryService{
+                +Handle(GetAllSubscriptionsQuery): Task<IEnumerable<Subscription>>
+                +Handle(GetSubscriptionByIdQuery): Task<Subscription>
+            }
+        }
+        package "repositories"{
+            interface IOrderRepository{
+            }
+            interface ISubscriptionRepository{
+            }
+        }
+    }
+    package "infrastructure"{
+        package "persistence"{
+            package "efc"{
+                package "configuration"{
+                    package "extensions"{
+                        class ModelBuilderExtensions
+                    }
+                }
+                package "repositories"{
+                    class OrderRepository
+                    class SubscriptionRepository
+                }
+            }
+        }
+    }
+    package "application"{
+        package "acl"{
+            class PaymentContextFacade{
+                +orderCommandService: IOrderCommandService
+                +subscriptionCommandService: ISubscriptionCommandService
+                --
+                +PaymentContextFacade(IOrderCommandService, ISubscriptionCommandService)
+            }
+        }
+        package "internal"{
+            package "command services"{
+                class OrderCommandService{
+                    +orderRepository: IOrderRepository
+                    +unitOfWork: IUnitOfWork
+                    --
+                    +OrderCommandService(IOrderRepository, IUnitOfWork)
+                }
+                class SubscriptionCommandService{
+                    +subscriptionRepository: ISubscriptionRepository
+                    +unitOfWork: IUnitOfWork
+                    --
+                    +SubscriptionCommandService(IOrderRepository, IUnitOfWork)
+                }
+            }
+            package "query services"{
+                class OrderQueryService{
+                    +orderRepository: IOrderRepository
+                    --
+                    +OrderQueryService(IOrderRepository)
+                }
+                class SubscriptionQueryService{
+                    +subscriptionRepository: ISubscriptionRepository
+                    --
+                    +SubscriptionQueryService(ISubscriptionRepository)
+                }
+            }
+        }
+    }
+    package "interfaces"{
+        package "acl"{
+            interface IPaymentContextFacade{
+            --
+                +CreateOrder(userId: int, subscriptionId: int, orderNumber: int, total: decimal, status: string, type: string): Task<int>
+                +CreateSubscription(status: string, plan: string): Task<int>            
+            }
+        }
+        package "rest"{
+            package "resources"{
+                record CreateOrderResource
+                record CreateSubscriptionResource
+                record OrderResource
+                record SubscriptionResource 
+            }
+            package "transform"{
+                class CreateOrderCommandFromResourceAssembler
+                class CreateSubscriptionCommandFromResourceAssembler
+                class OrderResourceFromEntityAssembler
+                class SubscriptionResourceFromEntityAssembler
+            }
+            class OrdersController{
+                +orderCommandService: IOrderCommandService
+                +orderQueryService: IOrderQueryService
+                --
+                +OrdersController(IOrderCommandService, IOrderQueryService)
+                +CreateOrder(CreateOrderResource): Task<IActionResult>
+                +GetOrderById(orderId: int): Task<IActionResult>
+                +GetAllOrders(): Task<IActionResult>
+            }
+            class SubscriptionsController{
+                +subscriptionCommandService: ISubscriptionCommandService
+                +subscriptionBoxQueryService: ISubscriptionQueryService
+                --
+                +SubscriptionsController(ISubscriptionCommandService, ISubscriptionQueryService)
+                +CreateSubscription(CreateSubscriptionResource): Task<IActionResult>
+                +GetSubscriptionById(orderId: int): Task<IActionResult>
+                +GetAllSubscriptions(): Task<IActionResult>            
+            }
+        }
+    }
+}
+
+
+
+package "shared"{
+    package "domain"{
+        package "model"{
+            package "events"{
+                interface IEvent
+            }
+            package "value objects"{
+                record Money{
+                    +amount: decimal
+                    +currency: string
+                }
+            }
+        }
+        package "repositories"{
+            interface IBaseRepository
+            interface IUnitOfWork
+        }
+    }
+    package "infrastructure"{
+        package "interfaces"{
+            package "asp"{
+                package "configuration"{
+                    package "extensions"{
+                        class StringExtensions
+                    }
+                    class KebabCaseRouteNamingConvention
+                }
+            }        
+        }
+        package "mediator"{
+            package "cortex"{
+                package "configuration"{
+                    class LoggingCommandBehavior
+                }
+            }
+        }
+        package "persistence"{
+            package "efc"{
+                package "configuration"{
+                    package "extensions"{
+                        class ModelBuilderExtension
+                        class StringExtensions
+                    }
+                    class AppDbContext
+                }
+                package "repositories"{
+                    class BaseRepository
+                    class UnitOfWork
+                }
+            }
+        }
+    }
+    package "application"{
+        package "internal"{
+            package "event handlers"{
+                interface IEventHandler
+            }
+        }
+    }
+
+}
+
+
+Subscription --> SubscriptionStatus
+Subscription --> SubscriptionPlan
+Subscription ..> CreateSubscriptionCommand
+
+Order --> UserId
+Order --> SubscriptionId
+Order --> Money
+Order --> OrderStatus
+Order ..> CreateOrderCommand
+
+IOrderCommandService ..> CreateOrderCommand
+IOrderQueryService ..> GetAllOrdersQuery
+IOrderQueryService ..> GetOrderByIdQuery
+
+ISubscriptionCommandService ..> CreateSubscriptionCommand
+ISubscriptionQueryService ..> GetAllSubscriptionsQuery
+ISubscriptionQueryService ..> GetSubscriptionByIdQuery
+
+IOrderRepository --|> IBaseRepository
+ISubscriptionRepository --|> IBaseRepository
+
+OrderRepository --|> BaseRepository
+OrderRepository ..|> IOrderRepository
+
+SubscriptionRepository --|> BaseRepository
+SubscriptionRepository ..|> ISubscriptionRepository
+
+PaymentContextFacade ..|> IPaymentContextFacade
+
+
+OrderCommandService ..|> IOrderCommandService
+OrderCommandService --> IOrderRepository
+OrderCommandService --> IUnitOfWork
+
+SubscriptionCommandService ..|> ISubscriptionCommandService
+SubscriptionCommandService -->ISubscriptionRepository
+SubscriptionCommandService --> IUnitOfWork
+
+OrderQueryService ..|> IOrderQueryService
+OrderQueryService --> IOrderRepository
+
+SubscriptionQueryService ..|> ISubscriptionQueryService
+SubscriptionQueryService --> ISubscriptionRepository
+
+CreateOrderCommandFromResourceAssembler ..> CreateOrderResource
+CreateSubscriptionCommandFromResourceAssembler ..> CreateSubscriptionResource
+OrderResourceFromEntityAssembler ..> Order
+SubscriptionResourceFromEntityAssembler ..> Subscription
+
+OrdersController --> IOrderQueryService
+OrdersController --> IOrderCommandService
+OrdersController ..> CreateOrderResource
+
+
+SubscriptionsController --> ISubscriptionQueryService
+SubscriptionsController --> ISubscriptionCommandService
+SubscriptionsController ..> CreateSubscriptionResource
+@enduml

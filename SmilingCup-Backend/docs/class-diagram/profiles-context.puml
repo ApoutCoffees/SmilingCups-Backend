@@ -1,0 +1,390 @@
+﻿@startuml
+
+left to right direction
+
+package "profiles"{
+    package "domain"{
+        package "model"{
+            package "aggregates"{
+                class MonthlySale{
+                    +id: int
+                    +producerStatId: ProducerStatId 
+                    +month: Month
+                    +sales: int
+                    +MonthlySale()
+                    +MonthlySale(CreateMonthlySaleCommand)
+                }
+                class ProducerStat{
+                    +id: int
+                    +userId: UserId
+                    +unitsSold: int
+                    +topCoffeeId: CoffeeId
+                    +ProducerStat()
+                    +ProducerStat(CreateProducerStatCommand)
+                }
+                class Favorite{
+                    +id: int
+                    +userId: UserId
+                    +coffeeId: CoffeeId
+                    +Favorite()
+                    +Favorite(CreateFavoriteCommand
+                }
+            }
+            package "value objects"{
+                record ProducerStatId {
+                  +producerStatId: int
+                }
+                record UserId {
+                  +userId: int
+                }
+                record CoffeeId{
+                    +coffeeId: int
+                }
+                enum Month{
+                    JANUARY
+                    FEBRUARY
+                    MARCH
+                    MAY
+                    JUNE
+                    JULY
+                    AUGUST
+                    SEPTEMBER
+                    OCTOBER
+                    NOVEMBER
+                    DECEMBER
+                }
+            }
+            package "commands"{
+                record CreateProducerStatCommand{
+                    +userId: int
+                    +unitsSold: int
+                    +topCoffeeId: int
+                }
+                record CreateMonthlySaleCommand{
+                    +producerStatId: int 
+                    +month: string
+                    +sales: int         
+                }
+                record CreateFavoriteCommand{
+                    +userId: int
+                    +coffeeId: int                
+                }
+            }
+            package "queries"{
+                record GetAllProducerStatsQuery{}
+                record GetAllMonthlySalesQuery{}
+                record GetAllFavoritesQuery{}
+                record GetProducerStatByIdQuery{
+                    +id int
+                }
+                record GetMonthlySaleByIdQuery{
+                    +id: int
+                }
+                record GetFavoriteByIdQuery{
+                    +id: int
+                }
+            }
+        }
+        package "services"{
+            interface IProducerStatCommandService{
+                +Handle(CreateMonthlySaleCommand): Task<ProducerStat>
+            }
+            interface IProducerStatQueryService{
+                +Handle(GetAllProducerStatsQuery): Task<IEnumerable<ProducerStat>>
+                +Handle(GetProducerStatByIdQuery): Task<ProducerStat>
+            }
+            interface IMonthlySaleCommandService{
+                +Handle(CreateMonthlySaleCommand): Task<MonthlySale>
+            }
+            interface IMonthlySaleQueryService{
+                +Handle(GetAllMonthlySalesQuery): Task<IEnumerable<MonthlySale>>
+                +Handle(GetMonthlySaleByIdQuery): Task<MonthlySale>
+            }
+            interface IFavoriteCommandService{
+                +Handle(CreateFavoriteCommand): Task<Favorite>
+            }
+            interface IFavoriteQueryService{
+                +Handle(GetAllFavoritesQuery): Task<IEnumerable<Favorite>>
+                +Handle(GetFavoriteByIdQuery): Task<Favorite>
+            }            
+        }
+        package "repositories"{
+            interface IProducerStatRepository{
+            }
+            interface IMonthlySaleRepository{
+            }
+            interface IFavoriteRepository{
+            }
+        }
+    }
+    package "infrastructure"{
+        package "persistence"{
+            package "efc"{
+                package "configuration"{
+                    package "extensions"{
+                        class ModelBuilderExtensions
+                    }
+                }
+                package "repositories"{
+                    class ProducerStatRepository
+                    class MonthlySaleRepository
+                    class FavoriteRepository
+                }
+            }
+        }
+    }
+    package "application"{
+        package "acl"{
+            class ProfilesContextFacade{
+                +producerStatCommandService: IProducerStatCommandService
+                +monthlySaleCommandService: IMonthlySaleCommandService
+                +favoriteCommandService: IFavoriteCommandService
+                --
+                +ProfilesContextFacade(IProducerStatCommandService, IMonthlySaleCommandService, IFavoriteCommandService)
+            }
+        }
+        package "internal"{
+            package "command services"{
+                class ProducerStatCommandService{
+                    +producerStatRepository: IProducerStatRepository
+                    +unitOfWork: IUnitOfWork
+                    --
+                    +ProducerStatCommandService(IProducerStatRepository, IUnitOfWork)
+                }
+                class MonthlySaleCommandService{
+                    +monthlySaleRepository: IMonthlySaleRepository
+                    +unitOfWork: IUnitOfWork
+                    --
+                    +MonthlySaleCommandService(IProducerStatRepository, IUnitOfWork)
+                }
+                class FavoriteCommandService{
+                    +favoriteRepository: IFavoriteRepository
+                    +unitOfWork: IUnitOfWork
+                    --
+                    +FavoriteCommandService(IFavoriteRepository, IUnitOfWork)
+                }                
+            }
+            package "query services"{
+                class ProducerStatQueryService{
+                    +producerStatRepository: IProducerStatRepository
+                    --
+                    +ProducerStatQueryService(IProducerStatRepository)
+                }
+                class MonthlySaleQueryService{
+                    +monthlySaleRepository: IMonthlySaleRepository
+                    --
+                    +MonthlySaleQueryService(IMonthlySaleRepository)
+                }
+                class FavoriteQueryService{
+                    +favoriteRepository: IFavoriteRepository
+                    --
+                    +FavoriteQueryService(IFavoriteRepository)
+                }                
+            }
+        }
+    }
+    package "interfaces"{
+        package "acl"{
+            interface IProfilesContextFacade{
+            --
+                +CreateProducerStat(userId: int, unitsSold: int, topCoffeeId: int): Task<int>
+                +CreateMonthlySale(producerStatId: int, month: string, sales: int): Task<int>  
+                +CreateFavorite(userId: int, coffeeId: int): Task<int>                                            
+            }
+        }
+        package "rest"{
+            package "resources"{
+                record CreateProducerStatResource
+                record CreateMonthlySaleResource
+                record CreateFavoriteResource
+                record ProducerStatResource
+                record MonthlySaleResource 
+                record FavoriteResource
+            }
+            package "transform"{
+                class CreateProducerStatCommandFromResourceAssembler
+                class CreateMonthlySaleCommandFromResourceAssembler
+                class CreateFavoriteCommandFromResourceAssembler
+                class ProducerStatResourceFromEntityAssembler
+                class MonthlySaleResourceFromEntityAssembler
+                class FavoriteResourceFromEntityAssembler
+            }
+            class ProducerStatsController{
+                +producerStatCommandService: IProducerStatCommandService
+                +producerStatQueryService: IProducerStatQueryService
+                --
+                +ProducerStatsController(IProducerStatCommandService, IProducerStatQueryService)
+                +CreateProducerStat(CreateProducerStatResource): Task<IActionResult>
+                +GetProducerStatById(producerStatId: int): Task<IActionResult>
+                +GetAllProducerStats(): Task<IActionResult>
+            }
+            class MonthlySalesController{
+                +monthlySaleCommandService: IMonthlySaleCommandService
+                +monthlySaleBoxQueryService: IMonthlySaleQueryService
+                --
+                +MonthlySalesController(IMonthlySaleCommandService, IMonthlySaleQueryService)
+                +CreateMonthlySale(CreateMonthlySaleResource): Task<IActionResult>
+                +GetMonthlySaleById(producerStatId: int): Task<IActionResult>
+                +GetAllMonthlySales(): Task<IActionResult>            
+            }
+            class FavoritesController{
+                +favoriteCommandService: IFavoriteCommandService
+                +favoriteQueryService: IFavoriteQueryService
+                --
+                +FavoritesController(IFavoriteCommandService, IFavoriteQueryService)
+                +CreateFavorite(CreateFavoriteResource): Task<IActionResult>
+                +GetFavoriteById(favoriteId: int): Task<IActionResult>
+                +GetAllFavorites(): Task<IActionResult>
+            }            
+        }
+    }
+}
+
+
+
+package "shared"{
+    package "domain"{
+        package "model"{
+            package "events"{
+                interface IEvent
+            }
+            package "value objects"{
+                record Money{
+                    +amount: decimal
+                    +currency: string
+                }
+            }
+        }
+        package "repositories"{
+            interface IBaseRepository
+            interface IUnitOfWork
+        }
+    }
+    package "infrastructure"{
+        package "interfaces"{
+            package "asp"{
+                package "configuration"{
+                    package "extensions"{
+                        class StringExtensions
+                    }
+                    class KebabCaseRouteNamingConvention
+                }
+            }        
+        }
+        package "mediator"{
+            package "cortex"{
+                package "configuration"{
+                    class LoggingCommandBehavior
+                }
+            }
+        }
+        package "persistence"{
+            package "efc"{
+                package "configuration"{
+                    package "extensions"{
+                        class ModelBuilderExtension
+                        class StringExtensions
+                    }
+                    class AppDbContext
+                }
+                package "repositories"{
+                    class BaseRepository
+                    class UnitOfWork
+                }
+            }
+        }
+    }
+    package "application"{
+        package "internal"{
+            package "event handlers"{
+                interface IEventHandler
+            }
+        }
+    }
+
+}
+
+
+MonthlySale --> ProducerStatId
+MonthlySale --> Month
+MonthlySale ..> CreateMonthlySaleCommand
+
+ProducerStat --> UserId
+ProducerStat --> CoffeeId
+ProducerStat ..> CreateProducerStatCommand
+
+Favorite --> UserId
+Favorite --> CoffeeId
+
+IProducerStatCommandService ..> CreateProducerStatCommand
+IProducerStatQueryService ..> GetAllProducerStatsQuery
+IProducerStatQueryService ..> GetProducerStatByIdQuery
+
+IMonthlySaleCommandService ..> CreateMonthlySaleCommand
+IMonthlySaleQueryService ..> GetAllMonthlySalesQuery
+IMonthlySaleQueryService ..> GetMonthlySaleByIdQuery
+
+IFavoriteCommandService ..> CreateFavoriteCommand
+IFavoriteQueryService ..> GetAllFavoritesQuery
+IFavoriteQueryService ..> GetFavoriteByIdQuery
+
+IProducerStatRepository --|> IBaseRepository
+IMonthlySaleRepository --|> IBaseRepository
+IFavoriteRepository --|> IBaseRepository
+
+ProducerStatRepository --|> BaseRepository
+ProducerStatRepository ..|> IProducerStatRepository
+
+MonthlySaleRepository --|> BaseRepository
+MonthlySaleRepository ..|> IMonthlySaleRepository
+
+FavoriteRepository --|> IFavoriteRepository
+FavoriteRepository ..|> IFavoriteRepository
+
+ProfilesContextFacade ..|> IProfilesContextFacade
+
+
+ProducerStatCommandService ..|> IProducerStatCommandService
+ProducerStatCommandService --> IProducerStatRepository
+ProducerStatCommandService --> IUnitOfWork
+
+MonthlySaleCommandService ..|> IMonthlySaleCommandService
+MonthlySaleCommandService -->IMonthlySaleRepository
+MonthlySaleCommandService --> IUnitOfWork
+
+FavoriteCommandService ..|> IFavoriteCommandService
+FavoriteCommandService --> IFavoriteRepository
+FavoriteCommandService --> IUnitOfWork
+
+ProducerStatQueryService ..|> IProducerStatQueryService
+ProducerStatQueryService --> IProducerStatRepository
+
+MonthlySaleQueryService ..|> IMonthlySaleQueryService
+MonthlySaleQueryService --> IMonthlySaleRepository
+
+FavoriteQueryService ..|> IFavoriteQueryService
+FavoriteQueryService --> IFavoriteRepository
+
+CreateProducerStatCommandFromResourceAssembler ..> CreateProducerStatResource
+CreateMonthlySaleCommandFromResourceAssembler ..> CreateMonthlySaleResource
+
+CreateFavoriteCommandFromResourceAssembler ..> CreateFavoriteResource
+ProducerStatResourceFromEntityAssembler ..> ProducerStat
+
+MonthlySaleResourceFromEntityAssembler ..> MonthlySale
+FavoriteResourceFromEntityAssembler ..> Favorite
+
+
+ProducerStatsController --> IProducerStatQueryService
+ProducerStatsController --> IProducerStatCommandService
+ProducerStatsController ..> CreateProducerStatResource
+
+
+MonthlySalesController --> IMonthlySaleQueryService
+MonthlySalesController --> IMonthlySaleCommandService
+MonthlySalesController ..> CreateMonthlySaleResource
+
+FavoritesController --> IFavoriteQueryService
+FavoritesController --> IFavoriteCommandService
+FavoritesController ..> CreateFavoriteResource
+@enduml
