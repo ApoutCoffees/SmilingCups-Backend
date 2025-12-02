@@ -34,7 +34,7 @@ public class SubscriptionsController(
     [SwaggerOperation("Create Subscription", "Create a new subscription.", OperationId = "CreateSubscription")]
     [SwaggerResponse(201, "The subscription was created.", typeof(SubscriptionResource))]
     [SwaggerResponse(400, "The subscription was not created.")]
-    public async Task<IActionResult> CreateSubscription(CreateSubscriptionResource resource)
+    public async Task<IActionResult> CreateSubscription([FromBody] CreateSubscriptionResource resource)
     {
         var createSubscriptionCommand = CreateSubscriptionCommandFromResourceAssembler.ToCommandFromResource(resource);
         var subscription = await subscriptionCommandService.Handle(createSubscriptionCommand);

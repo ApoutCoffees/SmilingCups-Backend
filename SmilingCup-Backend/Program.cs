@@ -1,6 +1,19 @@
 using Cortex.Mediator.Commands;
 using Cortex.Mediator.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using SmilingCup_Backend.Iam.Application.ACL;
+using SmilingCup_Backend.Iam.Application.Internal.CommandServices;
+using SmilingCup_Backend.Iam.Application.Internal.OutboundServices;
+using SmilingCup_Backend.Iam.Application.Internal.QueryServices;
+using SmilingCup_Backend.Iam.Domain.Repositories;
+using SmilingCup_Backend.Iam.Domain.Services;
+using SmilingCup_Backend.Iam.Infrastructure.Hashing.Bcrypt.Services;
+using SmilingCup_Backend.Iam.Infrastructure.Persistence.EFC.Repositories;
+using SmilingCup_Backend.Iam.Infrastructure.Pipeline.Middleware.Extensions;
+using SmilingCup_Backend.Iam.Infrastructure.Tokens.JWT.Configuration;
+using SmilingCup_Backend.Iam.Infrastructure.Tokens.JWT.Services;
+using SmilingCup_Backend.Iam.Interfaces.ACL;
 using SmilingCup_Backend.Payment.Application.Internal.CommandServices;
 using SmilingCup_Backend.Payment.Application.Internal.QueryServices;
 using SmilingCup_Backend.Payment.Domain.Repositories;
@@ -61,6 +74,56 @@ builder.Services.AddDbContext<AppDbContext>(options =>
             .LogTo(Console.WriteLine, LogLevel.Error);
 });
 
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    
+    options.SwaggerDoc("v1",
+        new OpenApiInfo
+        {
+            Title = "ApoutCoffees.SmilingCupBackend.API",
+            Version = "v1",
+            Description = "ApoutCoffees SmilingCup Backend API",
+            TermsOfService = new Uri("https://apoutcoffees-smilingcup.com/tos"),
+            Contact = new OpenApiContact
+            {
+                Name = "ApoutCoffee Studios",
+                Email = "contact@apoutcoffee.com"
+            },
+            License = new OpenApiLicense
+            {
+                Name = "Apache 2.0",
+                Url = new Uri("https://www.apache.org/licenses/LICENSE-2.0.html")
+            }
+        });
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Please enter token",
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        BearerFormat = "JWT",
+        Scheme = "bearer"
+    });
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Id = "Bearer",
+                    Type = ReferenceType.SecurityScheme
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+    options.EnableAnnotations();
+});
+
+
 
 // Dependency Injection
 
@@ -101,6 +164,21 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderCommandService, OrderCommandService>();
 builder.Services.AddScoped<IOrderQueryService, OrderQueryService>();
 
+// IAM Bounded Context Injection Configuration
+
+// TokenSettings Configuration
+
+builder.Services.Configure<TokenSettings>(builder.Configuration.GetSection("TokenSettings"));
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserCommandService, UserCommandService>();
+builder.Services.AddScoped<IUserQueryService, UserQueryService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IHashingService, HashingService>();
+builder.Services.AddScoped<IIamContextFacade, IamContextFacade>();
+
+
+// Mediator Configuration
 
 // Add Mediator Injection Configuration
 builder.Services.AddScoped(typeof(ICommandPipelineBehavior<>), typeof(LoggingCommandBehavior<>));
@@ -130,18 +208,19 @@ using (var scope = app.Services.CreateScope())
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    //app.UseSwagger();
+    //app.UseSwaggerUI();
 }
+app.UseSwagger();
+app.UseSwaggerUI();
+
 
 // Apply CORS Policy
 app.UseCors("AllowAllPolicy");
 
 
 // Add Authorization Middleware to Pipeline
-
-
-//app.UseRequestAuthorization();
+app.UseRequestAuthorization();
 
 app.UseHttpsRedirection();
 

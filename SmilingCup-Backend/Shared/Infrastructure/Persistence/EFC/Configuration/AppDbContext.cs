@@ -5,6 +5,7 @@ using SmilingCup_Backend.profiles.infrastructure.persistence.efc.configuration.e
 using SmilingCup_Backend.Shared.infrastructure.persistence.efc.configuration.extensions;
 using SmilingCup_Backend.Iam.Domain.Model.Aggregates; 
 using SmilingCup_Backend.Iam.Infrastructure.Persistence.EFC.Configuration.Extensions;
+using SmilingCup_Backend.Payment.Infrastructure.Persistence.EFC.Configuration.Extensions;
 
 namespace SmilingCup_Backend.Shared.infrastructure.persistence.efc.configuration;
 
@@ -28,6 +29,12 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
         
         //Product Context
         builder.ApplyProductConfiguration();
+        
+        //IAM Context
+        builder.ApplyIamConfiguration();
+        
+        //Payment Context
+        builder.ApplyPaymentsConfiguration();
 
         // General Naming Convention for the database objects
         builder.UseSnakeCaseNamingConvention();

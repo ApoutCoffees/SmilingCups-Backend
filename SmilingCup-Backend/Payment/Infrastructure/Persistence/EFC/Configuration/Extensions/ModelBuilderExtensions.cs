@@ -5,7 +5,7 @@ namespace SmilingCup_Backend.Payment.Infrastructure.Persistence.EFC.Configuratio
 
 public static class ModelBuilderExtensions
 {
-    public static void ApplyProfilesConfiguration(this ModelBuilder builder)
+    public static void ApplyPaymentsConfiguration(this ModelBuilder builder)
     {
         
         //Subscription Aggregate
