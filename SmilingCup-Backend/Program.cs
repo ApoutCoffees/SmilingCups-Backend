@@ -10,6 +10,7 @@ using SmilingCup_Backend.Iam.Domain.Repositories;
 using SmilingCup_Backend.Iam.Domain.Services;
 using SmilingCup_Backend.Iam.Infrastructure.Hashing.Bcrypt.Services;
 using SmilingCup_Backend.Iam.Infrastructure.Persistence.EFC.Repositories;
+using SmilingCup_Backend.Iam.Infrastructure.Pipeline.Middleware.Extensions;
 using SmilingCup_Backend.Iam.Infrastructure.Tokens.JWT.Configuration;
 using SmilingCup_Backend.Iam.Infrastructure.Tokens.JWT.Services;
 using SmilingCup_Backend.Iam.Interfaces.ACL;
@@ -219,9 +220,7 @@ app.UseCors("AllowAllPolicy");
 
 
 // Add Authorization Middleware to Pipeline
-
-
-//app.UseRequestAuthorization();
+app.UseRequestAuthorization();
 
 app.UseHttpsRedirection();
 

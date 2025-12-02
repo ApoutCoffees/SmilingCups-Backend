@@ -20,16 +20,19 @@ public static class ModelBuilderExtensions
                 fn.Property(p => p.LastName).HasColumnName("last_name");
             });
 
-            entity.Property(u => u.Email)
-                .HasConversion(
-                    emailVO => emailVO.Address, 
-                    dbValue => new Email(dbValue)  
-                )
-                .HasColumnName("email") 
-                .IsRequired()
-                .HasMaxLength(100);
+            entity.OwnsOne(u => u.Email, e =>
+            {
+                e.WithOwner().HasForeignKey("Id");
+                e.Property(p => p.Address)
+                    .IsRequired()
+                    .HasColumnName("email")
+                    .HasMaxLength(100);
+                
+                e.HasIndex(p => p.Address)
+                    .IsUnique();
+            });
+
             
-            entity.HasIndex(u => u.Email).IsUnique();
             
             entity.Property(u => u.Password)
                 .HasConversion(p => p.Value, dbVal => new Password(dbVal))
